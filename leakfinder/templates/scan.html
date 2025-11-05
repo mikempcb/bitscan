@@ -33,12 +33,19 @@
 
   <fieldset>
     <legend>Providers</legend>
-    <label><input type="checkbox" name="providers" value="github" checked> GitHub Code Search</label>
-    <label><input type="checkbox" name="providers" value="gitlab" checked> GitLab Search</label>
-    <label><input type="checkbox" name="providers" value="shodan" checked> Shodan (requires API key)</label>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+      <label><input type="checkbox" name="providers" value="github" checked> GitHub Code Search</label>
+      <label><input type="checkbox" name="providers" value="gitlab" checked> GitLab Search</label>
+      <label><input type="checkbox" name="providers" value="shodan" checked> Shodan (requires API key)</label>
+      <label><input type="checkbox" name="providers" value="bitbucket" checked> Bitbucket Snippets</label>
+      <label><input type="checkbox" name="providers" value="sourcegraph" checked> Sourcegraph</label>
+      <label><input type="checkbox" name="providers" value="google_cse" checked> Google Custom Search</label>
+      <label><input type="checkbox" name="providers" value="pastebin" checked> Pastebin (recent)</label>
+      <label><input type="checkbox" name="providers" value="wayback" checked> Wayback Machine</label>
+      <label><input type="checkbox" name="providers" value="hibp_pastes" checked> HIBP Pastes</label>
+    </div>
   </fieldset>
 
   <button type="submit">Run Scan</button>
 </form>
 {% endblock %}
-
