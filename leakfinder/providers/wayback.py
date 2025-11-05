@@ -7,7 +7,7 @@ from . import BaseProvider
 class WaybackProvider(BaseProvider):
     name = 'wayback'
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         # Search Internet Archive's Wayback Machine for archived pages
         # We'll search for common crypto-related file patterns
         

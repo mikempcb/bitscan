@@ -188,13 +188,14 @@ class CacheService:
             int: Number of entries invalidated
         """
         try:
-            query_filter = SearchCache.query
+            from ..models import db
+            query_filter = db.session.query(SearchCache)
             
             if provider:
                 query_filter = query_filter.filter(SearchCache.provider == provider)
             
             if query_pattern:
-                query_filter = query_filter.filter(SearchCache.query.contains(query_pattern))
+                query_filter = query_filter.filter(SearchCache.search_query.contains(query_pattern))
             
             entries = query_filter.all()
             count = len(entries)

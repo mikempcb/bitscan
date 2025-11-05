@@ -14,7 +14,7 @@ class SourcegraphProvider(BaseProvider):
             headers['Authorization'] = f'token {token}'
         return headers
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         # Use Sourcegraph.com public API
         base_query = query or 'keystore OR wallet.dat OR xprv OR mnemonic'
         

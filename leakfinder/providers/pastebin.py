@@ -7,7 +7,7 @@ from . import BaseProvider
 class PastebinProvider(BaseProvider):
     name = 'pastebin'
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         # Pastebin doesn't have a public search API, but we can use their scraping API
         # This searches recent public pastes
         
