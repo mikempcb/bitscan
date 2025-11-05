@@ -4,7 +4,7 @@ import hashlib
 from typing import List, Optional
 
 from ecdsa import SECP256k1, SigningKey
-from Crypto.Hash import RIPEMD
+from Crypto.Hash import RIPEMD160
 import base58
 from eth_keys import keys as eth_keys
 from eth_utils import to_checksum_address
@@ -90,7 +90,7 @@ class AddressUtils:
             pub = b'\x04' + vk.to_string()
 
         sha = hashlib.sha256(pub).digest()
-        ripe = RIPEMD.new(sha).digest()
+        ripe = RIPEMD160.new(sha).digest()
         versioned = b'\x00' + ripe  # mainnet P2PKH
         checksum = hashlib.sha256(hashlib.sha256(versioned).digest()).digest()[:4]
         return base58.b58encode(versioned + checksum).decode()
@@ -109,4 +109,3 @@ class AddressUtils:
             # unknown chain
             pass
         return links
-
