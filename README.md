@@ -13,13 +13,24 @@ LeakFinder is a powerful Flask application that helps security researchers and d
 
 ## ✨ Features
 
+### Core Features
 - **Multi-Provider Search**: 9 different data sources for comprehensive coverage
-- **Pattern Detection**: Identifies ETH private keys, BTC WIF, xprv keys, keystores, and mnemonic phrases
+- **Advanced Pattern Detection**: Sophisticated regex patterns for ETH private keys, BTC WIF, xprv keys, keystores, mnemonic phrases, and more
 - **Address Derivation**: Automatically derives wallet addresses from found private keys
 - **Explorer Integration**: Direct links to block explorers for balance checking
 - **Configurable Scanning**: Choose specific leak types and providers
-- **Graceful Degradation**: Works with free tiers and handles missing API keys
-- **Security-First**: Results are redacted in UI, no data storage
+
+### 🆕 Advanced Features (NEW!)
+- **Database Persistence**: SQLAlchemy-powered storage for search results, extracted keys, and wallet addresses
+- **Advanced DORK Operators**: Provider-specific search strategies (Shodan filters, GitHub qualifiers, Google operators)
+- **Creative Shodan Strategies**: Target FTP leaks, Docker registries, exposed .git directories, Elasticsearch, MongoDB, Redis, S3 buckets, and more
+- **Rate Limiting**: Token bucket algorithm with per-provider limits to respect API quotas
+- **Multiple Key Formats**: Detect keys in base64, hex, environment variables, JSON, split formats, comments, and code constants
+- **Context Capture**: Store surrounding text and full content for each match
+- **Content Snapshots**: Compressed storage of full page/file content for audit trail
+- **Hidden Key Detection**: Find obfuscated keys in comments, constants, and encoded formats
+- **UI Configuration**: Provider settings and search algorithms configurable via web interface (coming soon)
+- **Security-First**: Results are redacted in UI, secure database storage
 
 ## 🔍 Supported Providers
 
@@ -190,25 +201,50 @@ HIBP_API_KEY=your_hibp_api_key
 - **Combine providers**: Different sources find different leaks
 - **Check addresses**: Use explorer links to verify balances
 
+## 📚 Documentation
+
+Comprehensive documentation for advanced features:
+
+- **[CONFIGURATION.md](CONFIGURATION.md)** - Database setup, provider configuration, rate limiting, and pattern settings
+- **[SHODAN_STRATEGIES.md](SHODAN_STRATEGIES.md)** - Creative Shodan search strategies for finding crypto leaks
+- **[PATTERNS.md](PATTERNS.md)** - Detailed regex pattern documentation for all key formats
+- **[SETUP.md](SETUP.md)** - Installation and setup instructions
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributors
+
 ## 🏗️ Architecture
 
 ```
 leakfinder/
-├── __init__.py          # Flask app factory
+├── __init__.py          # Flask app factory with database init
+├── database.py          # Database initialization and config
 ├── views.py             # Routes and request handling
+├── models/              # 🆕 SQLAlchemy database models
+│   ├── __init__.py      # Database instance
+│   ├── search.py        # Search session model
+│   ├── provider.py      # Provider and settings models
+│   ├── result.py        # Search result model
+│   ├── key.py           # Extracted key model
+│   ├── address.py       # Wallet address model
+│   ├── content.py       # Content snapshot and context models
+│   └── rate_limit.py    # Rate limiting state model
 ├── providers/           # Data source implementations
 │   ├── __init__.py      # Base provider class
+│   ├── search_strategies.py  # 🆕 Advanced DORK operators
 │   ├── github.py        # GitHub Code Search
 │   ├── gitlab.py        # GitLab Search
-│   ├── shodan.py        # Shodan API
+│   ├── shodanp.py       # Shodan API with advanced strategies
 │   ├── bitbucket.py     # Bitbucket Snippets
 │   ├── sourcegraph.py   # Sourcegraph Search
-│   ├── google_cse.py    # Google Custom Search
+│   ├── google_cse.py    # Google Custom Search with operators
 │   ├── pastebin.py      # Pastebin Scraping
 │   ├── wayback.py       # Internet Archive
 │   └── hibp_pastes.py   # HIBP Pastes API
+├── services/            # 🆕 Business logic layer
+│   ├── storage.py       # Database persistence service
+│   └── extraction.py    # Key extraction and validation service
 ├── utils/
-│   ├── patterns.py      # Regex patterns for leak detection
+│   ├── patterns.py      # 🆕 Advanced regex patterns
+│   ├── rate_limiter.py  # 🆕 Rate limiting middleware
 │   └── crypto.py        # Address derivation utilities
 └── templates/           # HTML templates
     ├── base.html        # Base template
@@ -219,11 +255,13 @@ leakfinder/
 
 ## 🔒 Security Considerations
 
-- **No Data Storage**: All processing happens in-memory
+- **🆕 Secure Database Storage**: Encrypted SQLite database with proper access controls
+- **🆕 Content Compression**: zlib compression for efficient storage of large content
 - **Result Redaction**: Sensitive data is truncated in UI
-- **API Rate Limiting**: Respects provider rate limits
+- **🆕 Token Bucket Rate Limiting**: Advanced rate limiting respects all provider quotas
 - **Timeout Protection**: Prevents hanging requests
 - **Error Handling**: Graceful failure for each provider
+- **🆕 Audit Trail**: Full content snapshots for compliance and forensics
 
 ## 🤝 Contributing
 
