@@ -1,6 +1,7 @@
 """
 Database initialization and configuration.
 """
+import os
 from flask import Flask
 from .models import db
 
@@ -9,6 +10,12 @@ def init_db(app: Flask):
     """Initialize database with Flask app."""
     # Database configuration
     db_path = app.config.get('DATABASE_PATH', 'instance/leakfinder.db')
+    
+    # Ensure the directory exists
+    db_dir = os.path.dirname(db_path)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ECHO'] = app.config.get('SQL_ECHO', False)
@@ -107,4 +114,3 @@ def _init_default_providers():
             db.session.add(settings)
     
     db.session.commit()
-
