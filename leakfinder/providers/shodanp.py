@@ -4,12 +4,15 @@ import requests
 
 from . import BaseProvider
 from .search_strategies import ShodanStrategies
+from .provider_limits import get_max_results
+from ..utils.scan_depth import ScanDepthManager
 
 
 class ShodanProvider(BaseProvider):
     name = 'shodan'
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], 
+              max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         api_key = self.app.config.get('SHODAN_API_KEY')
         if not api_key:
             return [{
@@ -21,20 +24,24 @@ class ShodanProvider(BaseProvider):
                 'links': [],
             }]
 
-        # Get provider settings from database if available
-        try:
-            from ..models import db, Provider
-            db_provider = Provider.query.filter_by(name=self.name).first()
-            if db_provider and db_provider.settings:
-                settings = db_provider.settings
-                # Use advanced query strategies
-                strategy = self.app.config.get('SHODAN_STRATEGY', 'wallet_search')
-                base_query = ShodanStrategies.build_query(strategy, query)
-            else:
-                base_query = query or ShodanStrategies.build_query('wallet_search')
-        except Exception:
-            # Fallback if database not initialized
-            base_query = query or ShodanStrategies.build_query('wallet_search')
+        # Use maximum results for provider
+        actual_max_results = min(max_results, get_max_results(self.name))
+        
+        # Get Shodan strategies and filter by scan depth
+        all_strategies = ShodanStrategies.get_all_strategies()
+        filtered_strategies = ScanDepthManager.filter_strategies_by_depth(
+            self.name, all_strategies, scan_depth
+        )
+        
+        # Use the top strategy or custom query
+        if query:
+            base_query = query
+        elif filtered_strategies:
+            # Use the highest-rated strategy
+            top_strategy = filtered_strategies[0]
+            base_query = ShodanStrategies.build_query(top_strategy['name'])
+        else:
+            base_query = ShodanStrategies.build_query('wallet_search')
 
         params = {
             'key': api_key,
@@ -118,7 +125,7 @@ class ShodanProvider(BaseProvider):
                             'content': banner[:10000],  # Store first 10KB of banner
                         })
                         count += 1
-                        if count >= max_results:
+                        if count >= actual_max_results:
                             return results
             else:
                 # No banner but host matches query - store anyway
@@ -147,4 +154,3 @@ class ShodanProvider(BaseProvider):
         b = min(len(text), end + 60)
         snippet = text[a:b].replace('\n', ' ')
         return snippet
-

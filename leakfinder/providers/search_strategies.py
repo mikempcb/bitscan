@@ -2,6 +2,7 @@
 Advanced search strategies and DORK operators for each provider.
 """
 from typing import List, Dict, Any
+from ..utils.strategy_scorer import StrategyScorer
 
 
 class ShodanStrategies:
@@ -158,23 +159,33 @@ class ShodanStrategies:
     
     @classmethod
     def get_all_strategies(cls) -> List[Dict[str, Any]]:
-        """Get all available Shodan search strategies."""
-        return [
+        """Get all available Shodan search strategies ordered by likelihood."""
+        strategies = [
+            {'name': 'wallet_search', 'display': 'General Wallet Search', 'queries': cls.WALLET_SEARCH},
             {'name': 'ftp_leaks', 'display': 'FTP Server Leaks', 'queries': cls.FTP_LEAKS},
             {'name': 'directory_listings', 'display': 'HTTP Directory Listings', 'queries': cls.DIRECTORY_LISTINGS},
-            {'name': 'docker_registries', 'display': 'Exposed Docker Registries', 'queries': cls.DOCKER_REGISTRIES},
+            {'name': 'backup_files', 'display': 'Backup Files', 'queries': cls.BACKUP_FILES},
+            {'name': 'database_dumps', 'display': 'Database Dumps', 'queries': cls.DATABASE_DUMPS},
+            {'name': 'config_files', 'display': 'Config Files', 'queries': cls.CONFIG_FILES},
             {'name': 'git_exposure', 'display': 'Exposed Git Repositories', 'queries': cls.GIT_EXPOSURE},
             {'name': 'elasticsearch', 'display': 'Elasticsearch Instances', 'queries': cls.ELASTICSEARCH},
             {'name': 'mongodb', 'display': 'MongoDB Databases', 'queries': cls.MONGODB},
             {'name': 'redis', 'display': 'Redis Instances', 'queries': cls.REDIS},
-            {'name': 's3_buckets', 'display': 'S3 Buckets', 'queries': cls.S3_BUCKETS},
-            {'name': 'backup_files', 'display': 'Backup Files', 'queries': cls.BACKUP_FILES},
-            {'name': 'database_dumps', 'display': 'Database Dumps', 'queries': cls.DATABASE_DUMPS},
-            {'name': 'config_files', 'display': 'Config Files', 'queries': cls.CONFIG_FILES},
+            {'name': 'docker_registries', 'display': 'Exposed Docker Registries', 'queries': cls.DOCKER_REGISTRIES},
             {'name': 'jupyter', 'display': 'Jupyter Notebooks', 'queries': cls.JUPYTER},
             {'name': 'jenkins', 'display': 'Jenkins Servers', 'queries': cls.JENKINS},
-            {'name': 'wallet_search', 'display': 'General Wallet Search', 'queries': cls.WALLET_SEARCH},
+            {'name': 's3_buckets', 'display': 'S3 Buckets', 'queries': cls.S3_BUCKETS},
         ]
+        
+        # Add likelihood scores to each strategy
+        for strategy in strategies:
+            score = StrategyScorer.score_strategy('shodan', strategy['name'])
+            strategy['likelihood_score'] = score
+            strategy['likelihood'] = StrategyScorer.get_strategy_metadata('shodan', strategy['name'])['likelihood']
+        
+        # Sort by likelihood score (highest first)
+        strategies.sort(key=lambda x: x['likelihood_score'], reverse=True)
+        return strategies
 
 
 class GitHubStrategies:
@@ -349,4 +360,3 @@ def get_provider_strategies(provider_name: str) -> Any:
     }
     
     return strategy_map.get(provider_name)
-

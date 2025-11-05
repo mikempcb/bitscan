@@ -17,8 +17,25 @@
         <input type="text" name="language" placeholder="e.g. Python, JavaScript">
       </label>
       <label>Max results per provider
-        <input type="number" name="max_results" value="20" min="1" max="100">
+        <input type="number" name="max_results" value="50" min="1" max="1000">
       </label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Scan Depth</legend>
+    <div class="scan-depth-options">
+      {% for depth in scan_depths %}
+      <label class="scan-depth-option">
+        <input type="radio" name="scan_depth" value="{{ depth.value }}" 
+               {% if depth.value == 'medium' %}checked{% endif %}>
+        <div class="scan-depth-info">
+          <strong>{{ depth.name }}</strong>
+          <div class="scan-depth-description">{{ depth.description }}</div>
+          <div class="scan-depth-time muted">Estimated time: {{ depth.estimated_time }}</div>
+        </div>
+      </label>
+      {% endfor %}
     </div>
   </fieldset>
 
