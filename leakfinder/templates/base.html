@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LeakFinder Crypto Wallet Scanner</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    .muted { color: #666; font-size: 0.9em; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .artifact { background: #111; color: #0f0; padding: 4px 6px; border-radius: 4px; }
+    .addresses { margin-top: 4px; }
+    .tag { display: inline-block; background: #eef; color: #114; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>LeakFinder Crypto Wallet Scanner</h1>
+    <nav>
+      <a href="/">Home</a> · <a href="/scan">New Scan</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="muted" style="margin-top: 2rem;">
+    For defensive security use only. Avoid storing or sharing secrets from third parties.
+  </footer>
+</body>
+</html>
+

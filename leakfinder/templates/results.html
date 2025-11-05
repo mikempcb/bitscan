@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Scan Results</h2>
+{% if not results %}
+  <p>No results found for the selected providers and query.</p>
+{% else %}
+  <p class="muted">Showing {{ results|length }} artifacts.</p>
+  <ul>
+  {% for r in results %}
+    <li>
+      <div>
+        <span class="tag">{{ r.provider }}</span>
+        <strong>{{ r.source }}</strong>
+      </div>
+      <div class="mono artifact">
+        {{ r.artifact|redact }}
+      </div>
+      <div class="muted">
+        {{ r.preview }}
+      </div>
+      {% if r.addresses %}
+      <div class="addresses">
+        <strong>Derived addresses:</strong>
+        <ul>
+          {% for a in r.addresses %}
+            <li>
+              <span class="tag">{{ a.chain|upper }}</span>
+              <span class="mono">{{ a.address }}</span>
+              {% for link in explorer_links(a.address) %}
+                · <a href="{{ link }}" target="_blank">explorer</a>
+              {% endfor %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if r.links %}
+        <div>Links: {% for l in r.links %}<a href="{{ l }}" target="_blank">source</a>{% if not loop.last %}, {% endif %}{% endfor %}</div>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+<p><a href="/scan">Run another scan</a></p>
+{% endblock %}
+

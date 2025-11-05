@@ -1,0 +1,9 @@
+Flask>=3.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+eth-keys>=0.4.0
+eth-utils>=2.1.0
+ecdsa>=0.18.0
+base58>=2.1.1
+pycryptodome>=3.20.0
+
