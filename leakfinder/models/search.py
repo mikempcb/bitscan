@@ -21,7 +21,8 @@ class Search(db.Model):
     user_identifier = db.Column(db.String(255), nullable=True)  # For multi-user setups
     
     # Relationships
-    results = db.relationship('Result', back_populates='search', cascade='all, delete-orphan')
+    # TODO: Add relationship when Result model is created
+    # results = db.relationship('Result', back_populates='search', cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Search {self.id}: {self.query[:50]}...>'
@@ -37,6 +38,6 @@ class Search(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'completed_at': self.completed_at.isoformat() if self.completed_at else None,
             'status': self.status,
-            'results_count': len(self.results) if self.results else 0,
+            # TODO: Add results_count when Result model is created
+            # 'results_count': len(self.results) if self.results else 0,
         }
-
