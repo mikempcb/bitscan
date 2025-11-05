@@ -1,7 +1,13 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 from .providers.github import GitHubProvider
 from .providers.gitlab import GitLabProvider
 from .providers.shodanp import ShodanProvider
+from .providers.bitbucket import BitbucketProvider
+from .providers.sourcegraph import SourcegraphProvider
+from .providers.google_cse import GoogleCSEProvider
+from .providers.pastebin import PastebinProvider
+from .providers.wayback import WaybackProvider
+from .providers.hibp_pastes import HIBPPastesProvider
 from .utils.patterns import LeakPatterns
 from .utils.crypto import AddressUtils
 
@@ -13,6 +19,12 @@ def _providers(app):
         GitHubProvider(app),
         GitLabProvider(app),
         ShodanProvider(app),
+        BitbucketProvider(app),
+        SourcegraphProvider(app),
+        GoogleCSEProvider(app),
+        PastebinProvider(app),
+        WaybackProvider(app),
+        HIBPPastesProvider(app),
     ]
 
 
@@ -38,7 +50,7 @@ def scan():
     results = []
     patterns = LeakPatterns.build(kinds)
 
-    for prov in _providers(bp.app):
+    for prov in _providers(current_app):
         if prov.name not in selected_providers:
             continue
         try:
@@ -84,4 +96,3 @@ def inject_helpers():
     return {
         'explorer_links': AddressUtils.explorer_links,
     }
-

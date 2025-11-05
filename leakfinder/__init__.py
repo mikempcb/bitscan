@@ -9,6 +9,12 @@ def create_app():
         GITHUB_TOKEN=os.environ.get("GITHUB_TOKEN"),
         GITLAB_TOKEN=os.environ.get("GITLAB_TOKEN"),
         SHODAN_API_KEY=os.environ.get("SHODAN_API_KEY"),
+        BITBUCKET_USERNAME=os.environ.get("BITBUCKET_USERNAME"),
+        BITBUCKET_APP_PASSWORD=os.environ.get("BITBUCKET_APP_PASSWORD"),
+        SOURCEGRAPH_TOKEN=os.environ.get("SOURCEGRAPH_TOKEN"),
+        GOOGLE_CSE_API_KEY=os.environ.get("GOOGLE_CSE_API_KEY"),
+        GOOGLE_CSE_ID=os.environ.get("GOOGLE_CSE_ID"),
+        HIBP_API_KEY=os.environ.get("HIBP_API_KEY"),
         RESULTS_REDACT=True,
         MAX_RESULTS_PER_PROVIDER=int(os.environ.get("MAX_RESULTS_PER_PROVIDER", "25")),
         USER_AGENT=os.environ.get("USER_AGENT", "LeakFinder/1.0 (+https://example.com)"),
@@ -20,4 +26,3 @@ def create_app():
     app.register_blueprint(views_bp)
 
     return app
-
