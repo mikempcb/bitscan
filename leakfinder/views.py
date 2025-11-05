@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 from .providers.github import GitHubProvider
 from .providers.gitlab import GitLabProvider
 from .providers.shodanp import ShodanProvider
@@ -38,7 +38,7 @@ def scan():
     results = []
     patterns = LeakPatterns.build(kinds)
 
-    for prov in _providers(bp.app):
+    for prov in _providers(current_app):
         if prov.name not in selected_providers:
             continue
         try:
@@ -84,4 +84,3 @@ def inject_helpers():
     return {
         'explorer_links': AddressUtils.explorer_links,
     }
-
