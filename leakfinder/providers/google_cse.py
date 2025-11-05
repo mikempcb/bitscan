@@ -2,12 +2,16 @@ import re
 from typing import List, Dict, Pattern, Any
 import requests
 from . import BaseProvider
+from .provider_limits import get_max_results
+from .search_strategies import GoogleCSEStrategies
+from ..utils.scan_depth import ScanDepthManager
 
 
 class GoogleCSEProvider(BaseProvider):
     name = 'google_cse'
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], 
+              max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         api_key = self.app.config.get('GOOGLE_CSE_API_KEY')
         search_engine_id = self.app.config.get('GOOGLE_CSE_ID')
         
@@ -21,20 +25,33 @@ class GoogleCSEProvider(BaseProvider):
                 'links': [],
             }]
 
-        # Build search query
+        # Use maximum results for provider
+        actual_max_results = min(max_results, get_max_results(self.name))
+        
+        # Get configured providers to exclude from Google search
+        configured_providers = self._get_configured_providers()
+        
+        # Build search query with exclusions
         base_query = query or 'keystore OR "wallet.dat" OR xprv OR mnemonic OR "private key"'
         
-        # Add site filters for common code/paste sites
-        site_filters = [
-            'site:github.com',
-            'site:gitlab.com', 
-            'site:pastebin.com',
-            'site:gist.github.com',
-            'site:bitbucket.org',
-            'site:codeberg.org'
-        ]
+        # Get code hosting sites but exclude configured providers
+        all_code_sites = GoogleCSEStrategies.code_hosting_sites()
+        excluded_sites = self._get_sites_to_exclude(configured_providers)
         
-        full_query = f'{base_query} ({" OR ".join(site_filters)})'
+        # Filter out excluded sites
+        allowed_sites = [site for site in all_code_sites if site not in excluded_sites]
+        
+        # Build query with allowed sites and exclusions
+        if allowed_sites:
+            site_filters = [f'site:{site}' for site in allowed_sites]
+            full_query = f'{base_query} ({" OR ".join(site_filters)})'
+        else:
+            # If no allowed sites, search broadly but exclude configured sites
+            full_query = base_query
+            
+        # Add exclusions for configured provider sites
+        for excluded_site in excluded_sites:
+            full_query += f' -site:{excluded_site}'
         
         if owner:
             full_query += f' "{owner}"'
@@ -44,7 +61,7 @@ class GoogleCSEProvider(BaseProvider):
             'key': api_key,
             'cx': search_engine_id,
             'q': full_query,
-            'num': min(10, max_results),  # Google CSE max is 10 per request
+            'num': min(10, actual_max_results),  # Google CSE max is 10 per request
         }
 
         resp = requests.get(url, headers=self._headers(), params=params, timeout=self.app.config['REQUEST_TIMEOUT'])
@@ -83,6 +100,35 @@ class GoogleCSEProvider(BaseProvider):
                 })
 
         return results
+    
+    def _get_configured_providers(self) -> List[str]:
+        """Get list of configured providers to exclude from Google search."""
+        # This would ideally come from the app configuration
+        # For now, we'll use a static list of common providers
+        return [
+            'github',
+            'gitlab', 
+            'bitbucket',
+            'pastebin',
+            'sourcegraph',
+        ]
+    
+    def _get_sites_to_exclude(self, configured_providers: List[str]) -> List[str]:
+        """Map configured providers to their corresponding sites."""
+        provider_site_map = {
+            'github': ['github.com', 'gist.github.com'],
+            'gitlab': ['gitlab.com'],
+            'bitbucket': ['bitbucket.org'],
+            'pastebin': ['pastebin.com'],
+            'sourcegraph': ['sourcegraph.com'],
+        }
+        
+        excluded_sites = []
+        for provider in configured_providers:
+            sites = provider_site_map.get(provider, [])
+            excluded_sites.extend(sites)
+        
+        return excluded_sites
 
     @staticmethod
     def _find_matches(text: str, patterns: List[Pattern]):

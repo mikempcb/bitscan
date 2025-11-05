@@ -1,6 +1,31 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Scan Results</h2>
+
+{% if scan_metadata %}
+<div class="scan-summary">
+  <div class="scan-stats">
+    <div class="stat">
+      <strong>{{ scan_metadata.total_results }}</strong>
+      <span>Total Results</span>
+    </div>
+    <div class="stat">
+      <strong>{{ scan_metadata.cache_hit_rate }}%</strong>
+      <span>Cache Hit Rate</span>
+    </div>
+    <div class="stat">
+      <strong>{{ scan_metadata.scan_depth_info.name }}</strong>
+      <span>Scan Depth</span>
+    </div>
+  </div>
+  {% if scan_metadata.cache_hits > 0 %}
+  <div class="cache-info muted">
+    {{ scan_metadata.cache_hits }} of {{ scan_metadata.total_searches }} searches served from cache
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 {% if not results %}
   <p>No results found for the selected providers and query.</p>
 {% else %}
@@ -43,4 +68,3 @@
 {% endif %}
 <p><a href="/scan">Run another scan</a></p>
 {% endblock %}
-
