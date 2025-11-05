@@ -1,17 +1,37 @@
 """
 Database initialization and configuration.
 """
+import os
 from flask import Flask
 from .models import db
 
 
 def init_db(app: Flask):
     """Initialize database with Flask app."""
-    # Database configuration
-    db_path = app.config.get('DATABASE_PATH', 'instance/leakfinder.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    # Database configuration - use absolute path for Windows compatibility
+    default_db_path = os.path.join(app.instance_path, 'leakfinder.db')
+    db_path = app.config.get('DATABASE_PATH', default_db_path)
+    
+    # Convert to absolute path if it's relative
+    if not os.path.isabs(db_path):
+        db_path = os.path.abspath(db_path)
+    
+    # Ensure the directory exists
+    db_dir = os.path.dirname(db_path)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+    
+    # Use proper URI format for Windows (forward slashes work on Windows too)
+    db_path_uri = db_path.replace('\\', '/')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path_uri}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ECHO'] = app.config.get('SQL_ECHO', False)
+    
+    # Debug logging for troubleshooting
+    print(f"Database path: {db_path}")
+    print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"Database directory exists: {os.path.exists(db_dir)}")
+    print(f"Database file exists: {os.path.exists(db_path)}")
     
     # Initialize SQLAlchemy
     db.init_app(app)
@@ -107,4 +127,3 @@ def _init_default_providers():
             db.session.add(settings)
     
     db.session.commit()
-
