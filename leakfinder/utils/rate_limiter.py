@@ -4,7 +4,9 @@ Rate limiting utility for API providers with token bucket algorithm.
 import time
 from datetime import datetime
 from typing import Optional
-from ..models import db, Provider, RateLimit
+from ..models import db, Provider
+# TODO: Create RateLimit model when needed
+# from ..models import RateLimit
 
 
 class RateLimiter:
@@ -206,4 +208,3 @@ def get_rate_limit_status_all() -> list:
         status_list.append(limiter.get_status())
     
     return status_list
-
