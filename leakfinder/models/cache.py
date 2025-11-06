@@ -19,7 +19,7 @@ class SearchCache(db.Model):
     
     # Query parameters for cache key generation
     provider = db.Column(db.String(50), nullable=False)
-    query = db.Column(db.Text, nullable=False)
+    search_query = db.Column(db.Text, nullable=False)
     owner_filter = db.Column(db.String(255), nullable=True)
     language_filter = db.Column(db.String(50), nullable=True)
     pattern_kinds = db.Column(db.JSON, nullable=False)
@@ -43,13 +43,22 @@ class SearchCache(db.Model):
                           language_filter: str = None, pattern_kinds: list = None, 
                           scan_depth: str = 'medium') -> str:
         """Generate a unique cache key for search parameters."""
+        # Ensure pattern_kinds contains only strings (convert Pattern objects if needed)
+        safe_pattern_kinds = []
+        if pattern_kinds:
+            for kind in pattern_kinds:
+                if hasattr(kind, 'name'):  # Pattern object
+                    safe_pattern_kinds.append(kind.name)
+                else:  # String
+                    safe_pattern_kinds.append(str(kind))
+        
         # Create a consistent string representation of parameters
         params = {
             'provider': provider,
             'query': query or '',
             'owner_filter': owner_filter or '',
             'language_filter': language_filter or '',
-            'pattern_kinds': sorted(pattern_kinds or []),
+            'pattern_kinds': sorted(safe_pattern_kinds),
             'scan_depth': scan_depth,
         }
         
@@ -73,7 +82,7 @@ class SearchCache(db.Model):
                                          language_filter, pattern_kinds, scan_depth)
         
         # Look for valid cache entry
-        cache_entry = cls.query.filter_by(cache_key=cache_key).first()
+        cache_entry = db.session.query(cls).filter_by(cache_key=cache_key).first()
         
         if cache_entry is None:
             return None, False
@@ -128,7 +137,7 @@ class SearchCache(db.Model):
                                              language_filter, pattern_kinds, scan_depth)
             
             # Check if entry already exists
-            existing_entry = cls.query.filter_by(cache_key=cache_key).first()
+            existing_entry = db.session.query(cls).filter_by(cache_key=cache_key).first()
             if existing_entry:
                 # Update existing entry
                 cache_entry = existing_entry
@@ -139,7 +148,7 @@ class SearchCache(db.Model):
             
             # Set cache parameters
             cache_entry.provider = provider
-            cache_entry.query = query or ''
+            cache_entry.search_query = query or ''
             cache_entry.owner_filter = owner_filter
             cache_entry.language_filter = language_filter
             cache_entry.pattern_kinds = pattern_kinds or []

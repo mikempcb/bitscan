@@ -17,7 +17,7 @@ class GitLabProvider(BaseProvider):
             headers['PRIVATE-TOKEN'] = token
         return headers
 
-    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, owner: str, language: str, patterns: List[Pattern], max_results: int, scan_depth: str = 'medium') -> List[Dict[str, Any]]:
         # GitLab global search (gitlab.com) - may require token for full results
         base_query = query or 'mnemonic OR keystore OR "wallet.dat" OR xprv OR "PRIVATE KEY"'
         url = 'https://gitlab.com/api/v4/search'
@@ -87,4 +87,3 @@ class GitLabProvider(BaseProvider):
         b = min(len(text), end + 60)
         snippet = text[a:b].replace('\n', ' ')
         return snippet
-
